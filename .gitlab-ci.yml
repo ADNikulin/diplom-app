@@ -11,7 +11,7 @@ build:
   stage: build
   image: gcr.io/kaniko-project/executor:v1.22.0-debug
   tags:
-    - web-app-docker
+    - k8s
   only:
     - master
     - tags
