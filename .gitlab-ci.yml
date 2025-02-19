@@ -1,5 +1,6 @@
 stages:
   - build
+  - deploy
 
 variables:
   IMAGE_TAG_LATEST: latest
@@ -7,6 +8,10 @@ variables:
   VERSION: ${CI_COMMIT_TAG}
   IMAGE_NAME: diplom-app
   IMAGE: ${CI_REGISTRY_USER}/${IMAGE_NAME}
+  K8S_NAMESPACE: production
+  K8S_POD_NAME: static-site-app
+  K8S_DEPLOYMENT_NAME: ${K8S_POD_NAME}-deployment
+
 build:
   stage: build
   image: gcr.io/kaniko-project/executor:v1.22.0-debug
@@ -22,3 +27,22 @@ build:
     - if [ -z "$VERSION" ]; then VERSION=$IMAGE_TAG_COMMIT; fi
     - /kaniko/executor --context ${CI_PROJECT_DIR} --dockerfile ${CI_PROJECT_DIR}/Dockerfile --destination ${IMAGE}:$VERSION
     - /kaniko/executor --context ${CI_PROJECT_DIR} --dockerfile ${CI_PROJECT_DIR}/Dockerfile --destination ${IMAGE}:${IMAGE_TAG_LATEST}
+
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  tags:
+    - k8s
+  only:
+    - master
+    - tags
+  script:
+    - echo "Deploying to Kubernetes..."
+    - echo $KUBE_CONFIG | base64 -d > kubeconfig
+    - export KUBECONFIG=kubeconfig
+    - kubectl apply -f deploy/
+    - if [ -z "$VERSION" ]; then VERSION=$IMAGE_TAG_COMMIT; fi
+    - kubectl set image deployment/${K8S_DEPLOYMENT_NAME} ${K8S_POD_NAME}=${IMAGE}:$VERSION --namespace=${K8S_NAMESPACE}
+    - kubectl rollout restart deployment/${K8S_DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE}
+    - kubectl rollout status deployment/${K8S_DEPLOYMENT_NAME} --namespace=${K8S_NAMESPACE}
+  when: on_success
