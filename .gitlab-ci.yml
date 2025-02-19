@@ -18,7 +18,7 @@ build:
   script:
     - echo "Building Docker image..."
     - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"username\":\"${CI_REGISTRY_USER}\",\"password\":\"${CI_REGISTRY_PASSWORD}\"}}}" > /kaniko/.docker/config.json
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"${CCI_DOCKER_TOKEN}\"}}}" > /kaniko/.docker/config.json
     - if [ -z "$VERSION" ]; then VERSION=$IMAGE_TAG_COMMIT; fi
     - /kaniko/executor --context ${CI_PROJECT_DIR} --dockerfile ${CI_PROJECT_DIR}/Dockerfile --destination ${IMAGE}:$VERSION
     - /kaniko/executor --context ${CI_PROJECT_DIR} --dockerfile ${CI_PROJECT_DIR}/Dockerfile --destination ${IMAGE}:${IMAGE_TAG_LATEST}
