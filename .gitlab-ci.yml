@@ -13,7 +13,7 @@ build:
   tags:
     - web-app-docker
   only:
-    - main
+    - master
     - tags
   script:
     - echo "Building Docker image..."
