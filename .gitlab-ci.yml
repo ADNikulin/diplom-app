@@ -6,7 +6,7 @@ variables:
   IMAGE_TAG_COMMIT: ${CI_COMMIT_SHORT_SHA}
   VERSION: ${CI_COMMIT_TAG}
   IMAGE_NAME: diplom-app
-  IMAGE: ${CI_REGISTRY_USER}\${IMAGE_NAME}
+  IMAGE: ${CI_REGISTRY_USER}/${IMAGE_NAME}
 build:
   stage: build
   image: gcr.io/kaniko-project/executor:v1.22.0-debug
